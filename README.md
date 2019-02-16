@@ -2,9 +2,17 @@
 
 Lightweight [Neosnippet](https://github.com/Shougo/neosnippet-snippets/tree/master/neosnippets) parser and processor. Just an experiment how to get snippets in vim w/o dealing with many various plugins.
 
-## Install 
+### Install 
 ```bash
 go get github.com/nchern/go-snip/...
+```
+
+### Usage
+```bash
+$ go-snip -g=go -cmd=show fori 'foo()' index MAX 
+for index := 0; index < MAX; index++ {
+foo()
+}
 ```
 
 ## How to plug it into vim
