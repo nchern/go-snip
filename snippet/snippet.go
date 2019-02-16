@@ -145,7 +145,7 @@ func parseFile(filename string) (List, error) {
 func LoadFromDir(rootDir string) (Groups, error) {
 	// this implementation OVERWRITES group for files with the same names
 	res := Groups{}
-	if err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(rootDir, func(path string, info os.FileInfo, e error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -154,6 +154,7 @@ func LoadFromDir(rootDir string) (Groups, error) {
 		}
 		_, filename := filepath.Split(info.Name())
 		key := strings.TrimSuffix(filename, ext)
+		var err error
 		res[key], err = parseFile(path)
 		return err
 	}); err != nil {

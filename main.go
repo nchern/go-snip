@@ -89,9 +89,11 @@ func main() {
 		}
 		fmt.Println()
 	} else if *cmd == cmdLs {
-		snippets.PrintNames(os.Stdout)
+		err = snippets.PrintNames(os.Stdout)
+		dieIf(err)
 	} else if *cmd == cmdGroups {
-		groups.PrintNames(os.Stdout)
+		err = groups.PrintNames(os.Stdout)
+		dieIf(err)
 	} else {
 		flag.Usage()
 	}
