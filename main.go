@@ -37,6 +37,11 @@ func save(m snippet.Groups) error {
 
 func init() {
 	log.SetFlags(0)
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintf(flag.CommandLine.Output(), "%s recursively scans %q and reads all *.snip files found\n", os.Args[0], snippetsSrcRoot)
+	}
 }
 
 type commandList []string
