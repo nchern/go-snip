@@ -56,7 +56,7 @@ var (
 	cmdGroups = c("groups")
 
 	cmd   = flag.String("cmd", "", fmt.Sprintf("One of: %s", commands))
-	group = flag.String("g", "go", "Sets template group(snippet filename w/o .snip extension)")
+	group = flag.String("g", "go", "Sets snippets group(snippet filename w/o .snip extension)")
 )
 
 func c(s string) string {
