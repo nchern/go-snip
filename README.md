@@ -22,7 +22,7 @@ foo()
 
 ### Plug it into vim
 
-Let's say we want to have snippets for golang in vim. Install the command and then just add the following lines into your `.vimrc`
+Let's say we want to have snippets for golang in vim. Install the command and then just add the following lines into your `.vimrc`:
 
 ```vim
 "" Map GoSnip command to call the util
@@ -33,6 +33,8 @@ command! -range -nargs=* -complete=custom,ListSnippets GoSnip :<line1>,<line2>!g
 :endfun
 ```
 
+Then in the command mode you can run a command like this: `:GoSnip fori 'foo()' index MAX`. It will insert the `for i ..` snippet at the cursor position.
+.
 ## TODO
 - [ ] read snippets from cache file at least for name listing
 - [ ] configurable snippets search root
