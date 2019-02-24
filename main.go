@@ -18,7 +18,9 @@ const (
 )
 
 var (
-	homeDir = os.Getenv("HOME")
+	homeDir                = os.Getenv("HOME")
+	defaultSnippetsSrcRoot = inHome(".vim")
+	goSnipFile             = inHome(".go-snip")
 )
 
 func inHome(filename string) string {
@@ -56,9 +58,6 @@ func (l commandList) String() string {
 
 var (
 	commands = commandList{}
-
-	defaultSnippetsSrcRoot = inHome(".vim")
-	goSnipFile             = inHome(".go-snip")
 
 	cmdLs     = c("ls")
 	cmdShow   = c("show")
