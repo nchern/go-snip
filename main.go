@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	_CUSTOM_SNIPPETS_ROOT_VAR = "GOSNIP_SNIPPETS_ROOT"
+	customSnippetsRootVarName = "GOSNIP_SNIPPETS_ROOT"
 )
 
 var (
@@ -73,7 +73,7 @@ func c(s string) string {
 }
 
 func snippetsSrcRoot() string {
-	if customRoot := strings.TrimSpace(os.Getenv(_CUSTOM_SNIPPETS_ROOT_VAR)); customRoot != "" {
+	if customRoot := strings.TrimSpace(os.Getenv(customSnippetsRootVarName)); customRoot != "" {
 		return customRoot
 	}
 	return defaultSnippetsSrcRoot
