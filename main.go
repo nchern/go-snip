@@ -13,6 +13,10 @@ import (
 	"github.com/nchern/go-snip/snippet"
 )
 
+const (
+	_CUSTOM_SNIPPETS_ROOT_VAR = "GOSNIP_SNIPPETS_ROOT"
+)
+
 var (
 	homeDir = os.Getenv("HOME")
 )
@@ -40,7 +44,7 @@ func init() {
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
-		fmt.Fprintf(flag.CommandLine.Output(), "%s recursively scans %q and reads all *.snip files found\n", os.Args[0], snippetsSrcRoot)
+		fmt.Fprintf(flag.CommandLine.Output(), "%s recursively scans %q and reads all *.snip files found\n", os.Args[0], snippetsSrcRoot())
 	}
 }
 
@@ -53,8 +57,8 @@ func (l commandList) String() string {
 var (
 	commands = commandList{}
 
-	snippetsSrcRoot = inHome(".vim")
-	goSnipFile      = inHome(".go-snip")
+	defaultSnippetsSrcRoot = inHome(".vim")
+	goSnipFile             = inHome(".go-snip")
 
 	cmdLs     = c("ls")
 	cmdShow   = c("show")
@@ -69,13 +73,20 @@ func c(s string) string {
 	return s
 }
 
+func snippetsSrcRoot() string {
+	if customRoot := strings.TrimSpace(os.Getenv(_CUSTOM_SNIPPETS_ROOT_VAR)); customRoot != "" {
+		return customRoot
+	}
+	return defaultSnippetsSrcRoot
+}
+
 // go-snip -g=go -cmd=show func bar bazz
 // go-snip -g=go -cmd=ls
 // go-snip -g=go -cmd=groups
 func main() {
 	flag.Parse()
 
-	groups, err := snippet.LoadFromDir(snippetsSrcRoot)
+	groups, err := snippet.LoadFromDir(snippetsSrcRoot())
 	dieIf(err)
 
 	err = save(groups)
