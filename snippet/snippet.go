@@ -13,11 +13,17 @@ const (
 	ext = ".snip"
 )
 
-type Groups map[string]List
+type group struct {
+	list
+
+	sourceFilename string
+}
+
+type Groups map[string]*group
 
 func (g Groups) PrintNames(w io.Writer) error {
-	for k := range g {
-		if _, err := fmt.Fprintln(w, k); err != nil {
+	for k, v := range g {
+		if _, err := fmt.Fprintf(w, "%s\t(%s)\n", k, v.sourceFilename); err != nil {
 			return err
 		}
 	}
@@ -51,16 +57,16 @@ func (l stringList) Get(i int) string {
 	return ""
 }
 
-type List []*Snippet
+type list []*Snippet
 
-func (l List) add(s *Snippet) List {
+func (l list) add(s *Snippet) list {
 	if s == nil || s.Body == nil {
 		return l
 	}
 	return append(l, s)
 }
 
-func (l List) Find(name string) *Snippet {
+func (l list) Find(name string) *Snippet {
 	// TODO: handle alias
 	for _, s := range l {
 		if s.Name == name {
@@ -70,7 +76,7 @@ func (l List) Find(name string) *Snippet {
 	return nil
 }
 
-func (l List) PrintNames(w io.Writer) error {
+func (l list) PrintNames(w io.Writer) error {
 	for _, s := range l {
 		if _, err := fmt.Fprintln(w, s.Name); err != nil {
 			return err
@@ -97,8 +103,8 @@ func (l snippetLine) IsCommentOrBlank() bool {
 	return strings.HasPrefix(string(l), "#") || l == ""
 }
 
-func parse(reader io.Reader) (List, error) {
-	res := List{}
+func parse(reader io.Reader) (list, error) {
+	res := list{}
 	var current *Snippet
 
 	scanner := bufio.NewScanner(reader)
@@ -133,7 +139,7 @@ func parse(reader io.Reader) (List, error) {
 	return res, nil
 }
 
-func parseFile(filename string) (List, error) {
+func parseFile(filename string) (list, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -158,9 +164,15 @@ func LoadFromDir(rootDir string) (Groups, error) {
 		}
 		_, filename := filepath.Split(info.Name())
 		key := strings.TrimSuffix(filename, ext)
-		var err error
-		res[key], err = parseFile(path)
-		return err
+		snippets, err := parseFile(path)
+		if err != nil {
+			return err
+		}
+		res[key] = &group{
+			list:           snippets,
+			sourceFilename: filepath.Join(path, info.Name()),
+		}
+		return nil
 	}); err != nil {
 		return nil, err
 	}
