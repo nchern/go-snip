@@ -30,21 +30,21 @@ func (g Groups) PrintNames(w io.Writer) error {
 	return nil
 }
 
-type Snippet struct {
-	Name string
+type snippet struct {
+	name string
 
-	Abbr string
+	abbr string
 
-	Alias string
+	alias string
 
-	Body []string
+	body []string
 }
 
-func (s *Snippet) String() string {
-	return strings.Join(s.Body, "\n")
+func (s *snippet) String() string {
+	return strings.Join(s.body, "\n")
 }
 
-func (s *Snippet) Render(vals []string) string {
+func (s *snippet) Render(vals []string) string {
 	return expandVars(s.String(), vals)
 }
 
@@ -57,19 +57,19 @@ func (l stringList) Get(i int) string {
 	return ""
 }
 
-type list []*Snippet
+type list []*snippet
 
-func (l list) add(s *Snippet) list {
-	if s == nil || s.Body == nil {
+func (l list) add(s *snippet) list {
+	if s == nil || s.body == nil {
 		return l
 	}
 	return append(l, s)
 }
 
-func (l list) Find(name string) *Snippet {
+func (l list) Find(name string) *snippet {
 	// TODO: handle alias
 	for _, s := range l {
-		if s.Name == name {
+		if s.name == name {
 			return s
 		}
 	}
@@ -78,7 +78,7 @@ func (l list) Find(name string) *Snippet {
 
 func (l list) PrintNames(w io.Writer) error {
 	for _, s := range l {
-		if _, err := fmt.Fprintln(w, s.Name); err != nil {
+		if _, err := fmt.Fprintln(w, s.name); err != nil {
 			return err
 		}
 	}
@@ -105,7 +105,7 @@ func (l snippetLine) IsCommentOrBlank() bool {
 
 func parse(reader io.Reader) (list, error) {
 	res := list{}
-	var current *Snippet
+	var current *snippet
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -120,14 +120,14 @@ func parse(reader io.Reader) (list, error) {
 				current = nil
 				continue
 			}
-			current = &Snippet{Name: tokens[1]}
+			current = &snippet{name: tokens[1]}
 		} else if current != nil && snippetLine(line).IsAbbr() {
-			current.Abbr = line
+			current.abbr = line
 		} else if current != nil && snippetLine(line).IsAlias() {
 			tokens := strings.Fields(line)
-			current.Alias = stringList(tokens).Get(1)
+			current.alias = stringList(tokens).Get(1)
 		} else if current != nil {
-			current.Body = append(current.Body, line)
+			current.body = append(current.body, line)
 		}
 	}
 	res = res.add(current)
