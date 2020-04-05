@@ -23,24 +23,6 @@ var (
 	goSnipFile             = inHome(".go-snip")
 )
 
-func inHome(filename string) string {
-	return path.Join(homeDir, filename)
-}
-
-func dieIf(err error) {
-	if err != nil {
-		log.Fatalf("// FATAL: %s\n", err)
-	}
-}
-
-func save(m snippet.Groups) error {
-	body, err := json.Marshal(m)
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(goSnipFile, body, 0644)
-}
-
 func init() {
 	log.SetFlags(0)
 	flag.Usage = func() {
@@ -72,13 +54,6 @@ func c(s string) string {
 	return s
 }
 
-func snippetsSrcRoot() string {
-	if customRoot := strings.TrimSpace(os.Getenv(customSnippetsRootVarName)); customRoot != "" {
-		return customRoot
-	}
-	return defaultSnippetsSrcRoot
-}
-
 // go-snip -g=go -cmd=show func bar bazz
 // go-snip -g=go -cmd=ls
 // go-snip -g=go -cmd=groups
@@ -88,8 +63,7 @@ func main() {
 	groups, err := snippet.LoadFromDir(snippetsSrcRoot())
 	dieIf(err)
 
-	err = save(groups)
-	dieIf(err)
+	must(save(groups))
 
 	snippets, found := groups[*group]
 	if !found {
@@ -104,12 +78,39 @@ func main() {
 		}
 		fmt.Println()
 	} else if *cmd == cmdLs {
-		err = snippets.PrintNames(os.Stdout)
-		dieIf(err)
+		must(snippets.PrintNames(os.Stdout))
 	} else if *cmd == cmdGroups {
-		err = groups.PrintNames(os.Stdout)
-		dieIf(err)
+		must(groups.PrintNames(os.Stdout))
 	} else {
 		flag.Usage()
 	}
+}
+
+func snippetsSrcRoot() string {
+	if customRoot := strings.TrimSpace(os.Getenv(customSnippetsRootVarName)); customRoot != "" {
+		return customRoot
+	}
+	return defaultSnippetsSrcRoot
+}
+
+func inHome(filename string) string {
+	return path.Join(homeDir, filename)
+}
+
+func must(err error) {
+	dieIf(err)
+}
+
+func dieIf(err error) {
+	if err != nil {
+		log.Fatalf("// FATAL: %s\n", err)
+	}
+}
+
+func save(m snippet.Groups) error {
+	body, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(goSnipFile, body, 0644)
 }

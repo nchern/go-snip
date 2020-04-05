@@ -2,6 +2,7 @@ package snippet
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,3 +48,17 @@ func TestShouldParse(t *testing.T) {
 		})
 	}
 }
+
+func TestShouldParseFail(t *testing.T) {
+	expected := errors.New("boom")
+	r := &errReader{expected}
+	res, err := parse(r)
+	assert.Nil(t, res)
+	assert.Equal(t, expected, err)
+}
+
+type errReader struct {
+	err error
+}
+
+func (r *errReader) Read(p []byte) (n int, err error) { return 0, r.err }
