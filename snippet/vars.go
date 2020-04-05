@@ -9,13 +9,14 @@ import (
 func parseVar(v string) (index int, defaultVal string, err error) {
 	v = strings.TrimPrefix(v, "$")
 	v = strings.Trim(v, "{}")
-	toks := stringList(strings.Split(v, ":"))
-	i, err := strconv.ParseInt(toks[0], 0, 64)
+	toks := strings.Split(v, ":")
+	varName := toks[0]
+	i, err := strconv.ParseInt(varName, 0, 64)
 	if err != nil {
 		return
 	}
 	index = int(i)
-	defaultVal = toks.Get(1)
+	defaultVal = strings.Join(toks[1:], ":")
 	return
 }
 

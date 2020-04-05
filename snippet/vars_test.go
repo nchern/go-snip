@@ -1,6 +1,10 @@
 package snippet
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestParseVar(t *testing.T) {
 	for _, tt := range []struct {
@@ -48,21 +52,30 @@ func TestExpandVar(t *testing.T) {
 }
 
 func TestExpandVars(t *testing.T) {
+	const multilineWithComment = `
+	type ${0:Interface} interface {
+         ${1:/* TODO: add methods */}
+     }`
+	const multilineWithCommentExpanded = `
+	type Foo interface {
+         /* TODO: add methods */
+     }`
+
 	for _, tt := range []struct {
-		in   string
-		out  string
-		vars stringList
+		name     string
+		given    string
+		expected string
+		vars     stringList
 	}{
-		{"lala ${0} ${1} ${2:bar} bla", "lala foo fuzz bar bla", []string{"foo", "fuzz"}},
-		{"$0 - $1", "foo - bar", []string{"foo", "bar"}},
-		{"foo ${a} $b ${}", "foo ${a} $b ${}", []string{"foo", "bar"}},
-		{"{} [] () ]({", "{} [] () ]({", []string{"foo", "bar"}},
+		{"two provided one default", "lala ${0} ${1} ${2:bar} bla", "lala foo fuzz bar bla", []string{"foo", "fuzz"}},
+		{"expanded both", "$0 - $1", "foo - bar", []string{"foo", "bar"}},
+		{"vars in curly brackets", "foo ${a} $b ${}", "foo ${a} $b ${}", []string{"foo", "bar"}},
+		{"different brackets does not break", "{} [] () ]({", "{} [] () ]({", []string{"foo", "bar"}},
+		{"multiline with comment", multilineWithComment, multilineWithCommentExpanded, []string{"Foo"}},
 	} {
-		t.Run(tt.in, func(t *testing.T) {
-			v := expandVars(tt.in, tt.vars)
-			if v != tt.out {
-				t.Errorf("got %q, want %q", v, tt.out)
-			}
+		t.Run(tt.name, func(t *testing.T) {
+			actual := expandVars(tt.given, tt.vars)
+			assert.Equal(t, tt.expected, actual)
 		})
 	}
 }
