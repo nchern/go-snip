@@ -54,7 +54,7 @@ func LoadFromDir(rootDir string) (Groups, error) {
 // Groups represents a mapping if group names to snippet group data structure
 type Groups map[string]*group
 
-// PrintNames outputs group names along with thier the corresponding file names to a given writer
+// PrintNames outputs group names along with their the corresponding file names to a given writer
 func (g Groups) PrintNames(w io.Writer) error {
 	for k, v := range g {
 		if _, err := fmt.Fprintf(w, "%s\t(%s)\n", k, v.sourceFilename); err != nil {
