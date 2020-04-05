@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/nchern/go-snip)](https://goreportcard.com/report/github.com/nchern/go-snip)
+
 # go-snip
 
 Lightweight [Neosnippet](https://github.com/Shougo/neosnippet-snippets/tree/master/neosnippets) parser and processor. Just an experiment how to get snippets in vim w/o dealing with many various plugins.
