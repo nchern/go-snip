@@ -24,9 +24,8 @@ func (l list) add(s *snippet) list {
 }
 
 func (l list) Find(name string) *snippet {
-	// TODO: handle alias
 	for _, s := range l {
-		if s.name == name {
+		if s.name == name || s.alias == name {
 			return s
 		}
 	}

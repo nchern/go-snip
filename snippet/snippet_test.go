@@ -57,6 +57,35 @@ func TestShouldParseFail(t *testing.T) {
 	assert.Equal(t, expected, err)
 }
 
+func TestShouldFindSnippet(t *testing.T) {
+	underTest := list([]*snippet{
+		{name: "foo"},
+		{name: "bar", abbr: "first bar"},
+		{name: "bar", alias: "b"},
+		{name: "buzz", alias: "b"},
+		{name: "fuzz"},
+	})
+
+	var tests = []struct {
+		name          string
+		expectedIndex int
+		given         string
+	}{
+		{"find by name", 3, "buzz"},
+		{"find by name - searches first match", 1, "bar"},
+		{"find by alias - searches first match", 2, "b"},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			actual := underTest.Find(tt.given)
+			assert.Equal(t, underTest[tt.expectedIndex], actual)
+		})
+	}
+
+	assert.Nil(t, underTest.Find("not_existent"))
+}
+
 type errReader struct {
 	err error
 }
