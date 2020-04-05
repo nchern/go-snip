@@ -19,8 +19,42 @@ type group struct {
 	sourceFilename string
 }
 
+// LoadFromDir traverses given root dir, parses snippets and returns populated snippet group collection
+func LoadFromDir(rootDir string) (Groups, error) {
+	// this implementation OVERWRITES group for files with the same names
+
+	res := Groups{}
+	if err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(info.Name(), ext) {
+			return nil
+		}
+		_, filename := filepath.Split(info.Name())
+		key := strings.TrimSuffix(filename, ext)
+		snippets, err := parseFile(path)
+		if err != nil {
+			return err
+		}
+		res[key] = &group{
+			list:           snippets,
+			sourceFilename: filepath.Join(path, info.Name()),
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+// Groups represents a mapping if group names to snippet group data structure
 type Groups map[string]*group
 
+// PrintNames outputs group names along with thier the corresponding file names to a given writer
 func (g Groups) PrintNames(w io.Writer) error {
 	for k, v := range g {
 		if _, err := fmt.Fprintf(w, "%s\t(%s)\n", k, v.sourceFilename); err != nil {
@@ -46,43 +80,6 @@ func (s *snippet) String() string {
 
 func (s *snippet) Render(vals []string) string {
 	return expandVars(s.String(), vals)
-}
-
-type stringList []string
-
-func (l stringList) Get(i int) string {
-	if i < len(l) {
-		return l[i]
-	}
-	return ""
-}
-
-type list []*snippet
-
-func (l list) add(s *snippet) list {
-	if s == nil || s.body == nil {
-		return l
-	}
-	return append(l, s)
-}
-
-func (l list) Find(name string) *snippet {
-	// TODO: handle alias
-	for _, s := range l {
-		if s.name == name {
-			return s
-		}
-	}
-	return nil
-}
-
-func (l list) PrintNames(w io.Writer) error {
-	for _, s := range l {
-		if _, err := fmt.Fprintln(w, s.name); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 type snippetLine string
@@ -146,35 +143,4 @@ func parseFile(filename string) (list, error) {
 	}
 	defer file.Close()
 	return parse(file)
-}
-
-func LoadFromDir(rootDir string) (Groups, error) {
-	// this implementation OVERWRITES group for files with the same names
-
-	res := Groups{}
-	if err := filepath.Walk(rootDir, func(path string, info os.FileInfo, e error) error {
-		if e != nil {
-			return e
-		}
-		if info.IsDir() {
-			return nil
-		}
-		if !strings.HasSuffix(info.Name(), ext) {
-			return nil
-		}
-		_, filename := filepath.Split(info.Name())
-		key := strings.TrimSuffix(filename, ext)
-		snippets, err := parseFile(path)
-		if err != nil {
-			return err
-		}
-		res[key] = &group{
-			list:           snippets,
-			sourceFilename: filepath.Join(path, info.Name()),
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return res, nil
 }
