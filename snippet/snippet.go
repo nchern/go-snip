@@ -84,16 +84,20 @@ func (s *snippet) Render(vals []string) string {
 
 type snippetLine string
 
+func (l snippetLine) Fields() []string {
+	return strings.Fields(string(l))
+}
+
 func (l snippetLine) IsAbbr() bool {
-	return strings.HasPrefix(string(l), "abbr")
+	return strings.HasPrefix(string(l), "abbr ")
 }
 
 func (l snippetLine) IsSnippet() bool {
-	return strings.HasPrefix(string(l), "snippet")
+	return strings.HasPrefix(string(l), "snippet ")
 }
 
 func (l snippetLine) IsAlias() bool {
-	return strings.HasPrefix(string(l), "alias")
+	return strings.HasPrefix(string(l), "alias ")
 }
 
 func (l snippetLine) IsCommentOrBlank() bool {
@@ -106,25 +110,25 @@ func parse(reader io.Reader) (list, error) {
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+		line := snippetLine(strings.TrimSpace(scanner.Text()))
 
-		if snippetLine(line).IsCommentOrBlank() {
+		if line.IsCommentOrBlank() {
 			continue
-		} else if snippetLine(line).IsSnippet() {
+		} else if line.IsSnippet() {
 			res = res.add(current)
-			tokens := strings.Fields(line)
+			tokens := line.Fields()
 			if len(tokens) < 2 {
 				current = nil
 				continue
 			}
 			current = &snippet{name: tokens[1]}
-		} else if current != nil && snippetLine(line).IsAbbr() {
-			current.abbr = line
-		} else if current != nil && snippetLine(line).IsAlias() {
-			tokens := strings.Fields(line)
+		} else if current != nil && line.IsAbbr() {
+			current.abbr = strings.TrimSpace(strings.TrimPrefix(string(line), line.Fields()[0]))
+		} else if current != nil && line.IsAlias() {
+			tokens := line.Fields()
 			current.alias = stringList(tokens).Get(1)
 		} else if current != nil {
-			current.body = append(current.body, line)
+			current.body = append(current.body, string(line))
 		}
 	}
 	res = res.add(current)
