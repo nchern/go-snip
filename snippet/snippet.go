@@ -128,7 +128,7 @@ func parse(reader io.Reader) (list, error) {
 			tokens := line.Fields()
 			current.alias = stringList(tokens).Get(1)
 		} else if current != nil {
-			current.body = append(current.body, string(line))
+			current.body = append(current.body, scanner.Text())
 		}
 	}
 	res = res.add(current)

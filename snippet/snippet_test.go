@@ -34,9 +34,29 @@ func TestShouldParse(t *testing.T) {
 		expected list
 	}{
 		{"empty", "", []*snippet{}},
-		{"two_with_multiline", snippetText, []*snippet{
-			{name: "foo", alias: "f", abbr: "foo ...", body: []string{"foobar"}},
-			{name: "multiline", alias: "m", abbr: "multiline ...", body: []string{"bar", "fuzzbuzz"}}}},
+		{
+			"two_with_multiline",
+			snippetText,
+			[]*snippet{
+				{
+					name:  "foo",
+					alias: "f",
+					abbr:  "foo ...",
+					body: []string{
+						"    foobar",
+					},
+				},
+				{
+					name:  "multiline",
+					alias: "m",
+					abbr:  "multiline ...",
+					body: []string{
+						"    bar",
+						"\tfuzzbuzz",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
