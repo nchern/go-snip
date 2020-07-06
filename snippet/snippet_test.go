@@ -44,6 +44,7 @@ func TestShouldParse(t *testing.T) {
 					abbr:  "foo ...",
 					body: []string{
 						"    foobar",
+						"",
 					},
 				},
 				{
@@ -52,7 +53,10 @@ func TestShouldParse(t *testing.T) {
 					abbr:  "multiline ...",
 					body: []string{
 						"    bar",
+						"",
 						"\tfuzzbuzz",
+						"",
+						"",
 					},
 				},
 			},

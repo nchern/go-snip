@@ -75,7 +75,11 @@ type snippet struct {
 }
 
 func (s *snippet) String() string {
-	return strings.Join(s.body, "\n")
+	lines := []string{}
+	for _, s := range s.body {
+		lines = append(lines, s)
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (s *snippet) Render(vals []string) string {
@@ -100,8 +104,12 @@ func (l snippetLine) IsAlias() bool {
 	return strings.HasPrefix(string(l), "alias ")
 }
 
-func (l snippetLine) IsCommentOrBlank() bool {
-	return strings.HasPrefix(string(l), "#") || l == ""
+func (l snippetLine) IsComment() bool {
+	return strings.HasPrefix(string(l), "#")
+}
+
+func (l snippetLine) IsBlank() bool {
+	return strings.TrimSpace(string(l)) == ""
 }
 
 func parse(reader io.Reader) (list, error) {
@@ -112,7 +120,7 @@ func parse(reader io.Reader) (list, error) {
 	for scanner.Scan() {
 		line := snippetLine(strings.TrimSpace(scanner.Text()))
 
-		if line.IsCommentOrBlank() {
+		if line.IsComment() {
 			continue
 		} else if line.IsSnippet() {
 			res = res.add(current)
