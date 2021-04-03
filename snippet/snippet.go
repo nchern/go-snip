@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,12 +73,17 @@ type snippet struct {
 	alias string
 
 	body []string
+
+	bodyMinIndent int
 }
 
 func (s *snippet) String() string {
 	lines := []string{}
-	for _, s := range s.body {
-		lines = append(lines, s)
+	for _, l := range s.body {
+		if s.bodyMinIndent > 0 && strings.TrimSpace(l) != "" {
+			l = l[s.bodyMinIndent:]
+		}
+		lines = append(lines, l)
 	}
 	return strings.Join(lines, "\n")
 }
@@ -129,13 +135,17 @@ func parse(reader io.Reader) (list, error) {
 				current = nil
 				continue
 			}
-			current = &snippet{name: tokens[1]}
+			current = &snippet{name: tokens[1], bodyMinIndent: int(math.MaxInt64)}
 		} else if current != nil && line.IsAbbr() {
 			current.abbr = strings.TrimSpace(strings.TrimPrefix(string(line), line.Fields()[0]))
 		} else if current != nil && line.IsAlias() {
 			tokens := line.Fields()
 			current.alias = stringList(tokens).Get(1)
 		} else if current != nil {
+			ind := len(scanner.Text()) - len(strings.TrimLeft(scanner.Text(), " "))
+			if ind < current.bodyMinIndent && line != "" {
+				current.bodyMinIndent = ind
+			}
 			current.body = append(current.body, scanner.Text())
 		}
 	}

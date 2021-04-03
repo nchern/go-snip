@@ -27,6 +27,25 @@ abbr multiline ...
 `
 )
 
+func TestTestShouldStringOK(t *testing.T) {
+	const given = `
+snippet foo
+alias f
+abbr foo ...
+    foobar
+
+snippet multiline
+alias m
+abbr multiline ...
+    bar
+        fuzzbuzz
+`
+	underTest, err := parse(bytes.NewBufferString(given))
+	assert.NoError(t, err)
+	assert.Equal(t, "foobar\n", underTest[0].String())
+	assert.Equal(t, "bar\n    fuzzbuzz", underTest[1].String())
+}
+
 func TestShouldParse(t *testing.T) {
 	var tests = []struct {
 		name     string
@@ -46,6 +65,7 @@ func TestShouldParse(t *testing.T) {
 						"    foobar",
 						"",
 					},
+					bodyMinIndent: 4,
 				},
 				{
 					name:  "multiline",
